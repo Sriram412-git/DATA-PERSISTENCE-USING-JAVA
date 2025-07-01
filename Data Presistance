@@ -1,0 +1,74 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DataPersistenceExample {
+
+    // User class
+    static class User {
+        private String name;
+        private int age;
+        private String email;
+
+        public User(String name, int age, String email) {
+            this.name = name;
+            this.age = age;
+            this.email = email;
+        }
+
+        public String toFileString() {
+            return name + "," + age + "," + email;
+        }
+
+        public static User fromFileString(String line) {
+            String[] parts = line.split(",");
+            return new User(parts[0], Integer.parseInt(parts[1]), parts[2]);
+        }
+
+        @Override
+        public String toString() {
+            return "User{name='" + name + "', age=" + age + ", email='" + email + "'}";
+        }
+    }
+
+    // FilePersistence class
+    static class FilePersistence {
+        private static final String FILE_NAME = "users.txt";
+
+        public static void saveUser(User user) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true))) {
+                writer.write(user.toFileString());
+                writer.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public static List<User> loadUsers() {
+            List<User> users = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    users.add(User.fromFileString(line));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return users;
+        }
+    }
+
+    // Main method
+    public static void main(String[] args) {
+        User user1 = new User("Alice", 25, "alice@example.com");
+        User user2 = new User("Bob", 30, "bob@example.com");
+
+        FilePersistence.saveUser(user1);
+        FilePersistence.saveUser(user2);
+
+        System.out.println("Users loaded from file:");
+        for (User user : FilePersistence.loadUsers()) {
+            System.out.println(user);
+        }
+    }
+}
